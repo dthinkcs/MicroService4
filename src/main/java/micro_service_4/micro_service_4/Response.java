@@ -1,5 +1,8 @@
 package micro_service_4.micro_service_4;
 
+import micro_service_4.micro_service_4.Modules.AddressDetails;
+import micro_service_4.micro_service_4.Modules.ProductDetails;
+
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -8,10 +11,10 @@ public class Response {
 
     private UUID order_id;
     //product
-    private List<UUID> products;
+    private List<ProductDetails> products;
 
     private Date date_of_purchase;
-    private String address;
+    private AddressDetails address;
 
     private UUID payment_id;
 
@@ -19,7 +22,7 @@ public class Response {
 
     }
 
-    public Response(UUID order_id, List<UUID> products, Date date_of_purchase, String address, UUID payment_id) {
+    public Response(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, UUID payment_id) {
         this.order_id = order_id;
         this.products = products;
         this.date_of_purchase = date_of_purchase;
@@ -35,11 +38,11 @@ public class Response {
         this.order_id = order_id;
     }
 
-    public List<UUID> getProducts() {
+    public List<ProductDetails> getProducts() {
         return products;
     }
 
-    public void setProducts(List<UUID> products) {
+    public void setProducts(List<ProductDetails> products) {
         this.products = products;
     }
 
@@ -51,11 +54,11 @@ public class Response {
         this.date_of_purchase = date_of_purchase;
     }
 
-    public String getAddress() {
+    public AddressDetails getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(AddressDetails address) {
         this.address = address;
     }
 
