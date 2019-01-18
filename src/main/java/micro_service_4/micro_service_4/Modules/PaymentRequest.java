@@ -6,7 +6,7 @@ import java.util.UUID;
 public class PaymentRequest {
 
     private UUID paymentId;
-    private UUID cartId;
+    private UUID orderId;
     private Boolean isSuccess;
     private String modeOfPayment;
     private Date dateOfPurchase;
@@ -15,9 +15,9 @@ public class PaymentRequest {
 
     }
 
-    public PaymentRequest(UUID paymentId, UUID cartId, Boolean isSuccess, String modeOfPayment, Date dateOfPurchase) {
+    public PaymentRequest(UUID paymentId, UUID orderId, Boolean isSuccess, String modeOfPayment, Date dateOfPurchase) {
         this.paymentId = paymentId;
-        this.cartId = cartId;
+        this.orderId = orderId;
         this.isSuccess = isSuccess;
         this.modeOfPayment = modeOfPayment;
         this.dateOfPurchase = dateOfPurchase;
@@ -31,12 +31,12 @@ public class PaymentRequest {
         this.paymentId = paymentId;
     }
 
-    public UUID getCartId() {
-        return cartId;
+    public UUID getOrderId() {
+        return orderId;
     }
 
-    public void setCartId(UUID cartId) {
-        this.cartId = cartId;
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
     }
 
     public Boolean getSuccess() {

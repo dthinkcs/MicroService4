@@ -1,4 +1,4 @@
-package micro_service_4.micro_service_4;
+package micro_service_4.micro_service_4.Modules;
 
 import micro_service_4.micro_service_4.Modules.AddressDetails;
 import micro_service_4.micro_service_4.Modules.ProductDetails;
@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class Response {
+public class OrderSummaryResponse {
 
     private UUID order_id;
     //product
@@ -17,17 +17,26 @@ public class Response {
     private AddressDetails address;
 
     private UUID payment_id;
+    private Boolean isOrderConfirmed;
 
-    public Response(){
+    public OrderSummaryResponse(){
 
     }
 
-    public Response(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, UUID payment_id) {
+    public OrderSummaryResponse(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, UUID payment_id) {
         this.order_id = order_id;
         this.products = products;
         this.date_of_purchase = date_of_purchase;
         this.address = address;
         this.payment_id = payment_id;
+    }
+
+    public Boolean getOrderConfirmed() {
+        return isOrderConfirmed;
+    }
+
+    public void setOrderConfirmed(Boolean orderConfirmed) {
+        isOrderConfirmed = orderConfirmed;
     }
 
     public UUID getOrder_id() {

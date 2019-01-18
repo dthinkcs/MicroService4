@@ -3,8 +3,7 @@ package micro_service_4.micro_service_4.Modules;
 import java.util.UUID;
 
 public class ProductDetails {
-
-
+    
 
     private UUID productId;
     private String productName;

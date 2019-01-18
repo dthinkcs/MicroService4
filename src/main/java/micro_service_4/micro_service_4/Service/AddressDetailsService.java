@@ -12,14 +12,22 @@ import java.util.UUID;
 public class AddressDetailsService {
     @Autowired
     private AddressDetailsRepository addressdetailsrepository;
-    public void add_addressdetails(AddressDetails addressdetails){
+    private void addAddressDetailsEntry(AddressDetails addressdetails){
         addressdetailsrepository.save(addressdetails);
     }
 
-    public AddressDetails getAddressDetails(UUID addressId){
+    AddressDetails getAddressDetails(UUID addressId){ // package private
         Optional<AddressDetails> addressDetails = addressdetailsrepository.findById(addressId);
-
         return addressDetails.get();
     }
+
+    public void addAddressDetails(AddressDetails addressDetails){
+        addressDetails.setAddressId(UUID.randomUUID());
+        this.addAddressDetailsEntry(addressDetails);
+    }
+
+
+
+
 }
 

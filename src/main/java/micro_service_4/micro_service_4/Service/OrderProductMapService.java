@@ -15,12 +15,12 @@ public class OrderProductMapService {
     @Autowired
     private OrderProductMapRepository ordermaprepository;
 
-    public void add_maporder(OrderProductMap orderproductmap) {
+    private void addOrderProductMap(OrderProductMap orderproductmap) {
         ordermaprepository.save(orderproductmap);
     }
 
 
-    public List<ProductDetails> getAllProductsByOrderId(UUID orderId) {
+    List<ProductDetails> getAllProductsByOrderId(UUID orderId) {
 
         List<OrderProductMap> allOrderProducts = ordermaprepository.findAllProductsByOrderId(orderId);
 
@@ -39,10 +39,14 @@ public class OrderProductMapService {
                     );
 
             allProducts.add(productDetails);
-
         }
-
         return allProducts;
 
+    }
+
+     void saveToOrderProductMap(UUID order_id, UUID curr_prod_id, String productName, Integer curr_qty, Integer price) {
+
+        OrderProductMap orderProductMap = new OrderProductMap(order_id, curr_prod_id, productName, curr_qty, price);
+        this.addOrderProductMap(orderProductMap);
     }
 }
