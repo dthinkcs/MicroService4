@@ -13,7 +13,7 @@ public class OrderProductMap {
     @Column(name="orderid")
     private UUID orderId;
     @Column(name="productid")
-    private UUID productId;
+    private String productId;
     @Column(name="productname")
     private String productName;
     @Column(name="quantity")
@@ -24,7 +24,7 @@ public class OrderProductMap {
     public OrderProductMap() {
     }
 
-    public OrderProductMap(UUID orderId, UUID productId, String productName, Integer quantity, Integer price) {
+    public OrderProductMap(UUID orderId, String productId, String productName, Integer quantity, Integer price) {
         this.orderId = orderId;
         this.productId = productId;
         this.productName = productName;
@@ -36,7 +36,7 @@ public class OrderProductMap {
         return orderId;
     }
 
-    public UUID getProductId() {
+    public String getProductId() {
         return productId;
     }
 
@@ -56,7 +56,7 @@ public class OrderProductMap {
         this.orderId = orderId;
     }
 
-    public void setProductId(UUID productId) {
+    public void setProductId(String productId) {
         this.productId = productId;
     }
 

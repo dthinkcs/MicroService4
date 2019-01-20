@@ -20,25 +20,26 @@ public class Order {
     private Integer totalCost;
     @Column(name="isconfirmed")
     private Boolean isConfirmed;
+    @Column(name="paymentid")
+    private String paymentId;
 
 
     public Order() {
+
     }
 
-    public Order(UUID orderId, Date dateOfPurchase, UUID addressId, Integer totalCost,Boolean isConfirmed ) {
+    public Order(UUID orderId, Date dateOfPurchase, UUID addressId, Integer totalCost, Boolean isConfirmed, String paymentId) {
         this.orderId = orderId;
         this.dateOfPurchase = dateOfPurchase;
         this.addressId = addressId;
         this.totalCost = totalCost;
         this.isConfirmed = isConfirmed;
+        this.paymentId = paymentId;
     }
+
 
     public Boolean isConfirmed() {
         return isConfirmed;
-    }
-
-    public void setConfirmed(Boolean confirmed) {
-        isConfirmed = confirmed;
     }
 
     public UUID getOrderId() {
@@ -57,6 +58,10 @@ public class Order {
         return totalCost;
     }
 
+    public Boolean getConfirmed() { return isConfirmed; }
+
+    public String getPaymentId() { return paymentId; }
+
     public void setOrderId(UUID orderId) {
         this.orderId = orderId;
     }
@@ -72,4 +77,11 @@ public class Order {
     public void setTotalCost(Integer totalCost) {
         this.totalCost = totalCost;
     }
+
+    public void setConfirmed(Boolean confirmed) {
+        isConfirmed = confirmed;
+    }
+
+    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
+
 }

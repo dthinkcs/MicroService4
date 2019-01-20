@@ -16,14 +16,14 @@ public class OrderSummaryResponse {
     private Date date_of_purchase;
     private AddressDetails address;
 
-    private UUID payment_id;
+    private String payment_id;
     private Boolean isOrderConfirmed;
 
     public OrderSummaryResponse(){
 
     }
 
-    public OrderSummaryResponse(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, UUID payment_id) {
+    public OrderSummaryResponse(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, String payment_id) {
         this.order_id = order_id;
         this.products = products;
         this.date_of_purchase = date_of_purchase;
@@ -71,11 +71,11 @@ public class OrderSummaryResponse {
         this.address = address;
     }
 
-    public UUID getPayment_id() {
+    public String getPayment_id() {
         return payment_id;
     }
 
-    public void setPayment_id(UUID payment_id) {
+    public void setPayment_id(String payment_id) {
         this.payment_id = payment_id;
     }
 

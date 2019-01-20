@@ -5,10 +5,9 @@ import micro_service_4.micro_service_4.Service.AddressDetailsService;
 import micro_service_4.micro_service_4.Service.OrderService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 
 @RestController
@@ -47,12 +46,13 @@ public class OrderController {
 
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/orderSummary/")
-    public OrderSummaryResponse getOrderSummary(@RequestBody OrderSummaryRequest orderSummaryRequest){
+    @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/{orderId}")
+    public OrderSummaryResponse postOrderSummary(@PathVariable("orderId") UUID orderId){
 
-        return orderService.createResponseForOrderSummary(orderSummaryRequest.getOrderId());
+        return orderService.createResponseForOrderSummary(orderId);
 
     }
+
 
 
 }

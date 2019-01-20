@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class CartRequest {
 
-    private UUID cartId;
+    private String cartId;
     private List<ProductDetails> products;
     private AddressDetails address;
     private Integer totalCost;
@@ -14,7 +14,7 @@ public class CartRequest {
 
     }
 
-    public CartRequest(UUID cartId, List<ProductDetails> products, AddressDetails address, Integer totalCost) {
+    public CartRequest(String cartId, List<ProductDetails> products, AddressDetails address, Integer totalCost) {
         this.cartId = cartId;
         this.products = products;
         this.address = address;
@@ -39,11 +39,11 @@ public class CartRequest {
 
 
 
-    public UUID getCartId() {
+    public String getCartId() {
         return cartId;
     }
 
-    public void setCartId(UUID cartId) {
+    public void setCartId(String cartId) {
         this.cartId = cartId;
     }
 

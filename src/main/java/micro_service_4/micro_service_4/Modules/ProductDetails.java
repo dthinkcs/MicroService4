@@ -3,9 +3,9 @@ package micro_service_4.micro_service_4.Modules;
 import java.util.UUID;
 
 public class ProductDetails {
-    
 
-    private UUID productId;
+
+    private String productId;
     private String productName;
     private String brand;
     private Integer price;
@@ -15,7 +15,7 @@ public class ProductDetails {
 
     }
 
-    public ProductDetails(UUID productId,String productName, String brand, Integer price, Integer quantity) {
+    public ProductDetails(String productId,String productName, String brand, Integer price, Integer quantity) {
         this.productId = productId;
         this.productName = productName;
         this.brand = brand;
@@ -23,11 +23,11 @@ public class ProductDetails {
         this.quantity = quantity;
     }
 
-    public UUID getProductId() {
+    public String getProductId() {
         return productId;
     }
 
-    public void setProductId(UUID productId) {
+    public void setProductId(String productId) {
         this.productId = productId;
     }
 

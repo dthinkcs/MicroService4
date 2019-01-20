@@ -12,8 +12,6 @@ public class OrderService {
     @Autowired
     private OrderProductMapService orderProductMapService;
 
-    @Autowired
-    private CartOrderMapService cartOrderMapService;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -22,26 +20,23 @@ public class OrderService {
     private AddressDetailsService addressDetailsService;
 
 
-    public CartRequestResponse foo(UUID cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
+    public CartRequestResponse foo(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
 
-        UUID orderId = saveToOrderTable(null, address.getAddressId(), totalCost);
+        UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
 
         for (ProductDetails prod : productDetails) {
             orderProductMapService.saveToOrderProductMap(orderId, prod.getProductId(), prod.getProductName(), prod.getQuantity(), prod.getPrice());
         }
 
-        CartOrderMap cpMap = new CartOrderMap(orderId, cartId);
-        cartOrderMapService.add_mapcartorder(cpMap);
-
         return new CartRequestResponse(orderId);
     }
 
-    public OrderSummaryResponse bar(UUID orderId, UUID paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
+    public OrderSummaryResponse bar(UUID orderId, String paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
 
 //        if (!isSuccess)
 //            return null;
 
-        this.confirmOrderPayment(orderId,dateOfPurchase);
+        this.confirmOrderPayment(orderId,dateOfPurchase,paymentId);
         OrderSummaryResponse response =  createResponseForOrderSummary(orderId);
 
         //TODO
@@ -63,6 +58,7 @@ public class OrderService {
         response.setAddress(addressDetailsService.getAddressDetails(order.getAddressId()));
         response.setProducts(orderProductMapService.getAllProductsByOrderId(order.getOrderId()));
         response.setOrderConfirmed(order.isConfirmed());
+        response.setPayment_id(order.getPaymentId());
         return response;
     }
 
@@ -71,7 +67,7 @@ public class OrderService {
     private UUID saveToOrderTable(Date date_of_purchase, UUID address, Integer total_cost) {
 
         UUID orderId = UUID.randomUUID();
-        Order order = new Order(orderId, date_of_purchase, address, total_cost, false);
+        Order order = new Order(orderId, date_of_purchase, address, total_cost, false, null);
         System.out.println(order.getOrderId());
         System.out.println(order.getDateOfPurchase());
         System.out.println(this);
@@ -86,12 +82,13 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    private void confirmOrderPayment(UUID orderId,Date dateOfPurchase) {
+    private void confirmOrderPayment(UUID orderId,Date dateOfPurchase, String paymentId) {
 
         orderRepository.findById(orderId)
                 .map(order -> {
                     order.setConfirmed(true);
                     order.setDateOfPurchase(dateOfPurchase);
+                    order.setPaymentId(paymentId);
                     return orderRepository.save(order);
                 });
 

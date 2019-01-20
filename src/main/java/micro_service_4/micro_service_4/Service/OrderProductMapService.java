@@ -44,7 +44,7 @@ public class OrderProductMapService {
 
     }
 
-     void saveToOrderProductMap(UUID order_id, UUID curr_prod_id, String productName, Integer curr_qty, Integer price) {
+     void saveToOrderProductMap(UUID order_id, String curr_prod_id, String productName, Integer curr_qty, Integer price) {
 
         OrderProductMap orderProductMap = new OrderProductMap(order_id, curr_prod_id, productName, curr_qty, price);
         this.addOrderProductMap(orderProductMap);
