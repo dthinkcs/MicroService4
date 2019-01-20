@@ -16,7 +16,7 @@ public class AddressDetailsService {
         addressdetailsrepository.save(addressdetails);
     }
 
-    AddressDetails getAddressDetails(UUID addressId){ // package private
+    AddressDetails getAddressDetails(UUID addressId){
         Optional<AddressDetails> addressDetails = addressdetailsrepository.findById(addressId);
         return addressDetails.get();
     }

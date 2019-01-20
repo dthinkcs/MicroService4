@@ -1,5 +1,7 @@
 package micro_service_4.micro_service_4.Modules;
 
+import micro_service_4.micro_service_4.Exceptions.InvalidParameterException;
+
 import java.util.UUID;
 
 public class OrderSummaryRequest {
@@ -19,7 +21,8 @@ public class OrderSummaryRequest {
         return orderId;
     }
 
-    public void setOrderId(UUID orderId) {
-        this.orderId = orderId;
+    public void setOrderId(UUID orderId){
+            this.orderId = orderId;
+
     }
 }

@@ -1,5 +1,6 @@
 package micro_service_4.micro_service_4.Service;
 
+import micro_service_4.micro_service_4.Exceptions.OrderNotFoundException;
 import micro_service_4.micro_service_4.Modules.*;
 import micro_service_4.micro_service_4.Repository.OrderRepository;
 import micro_service_4.micro_service_4.Modules.OrderSummaryResponse;
@@ -20,7 +21,7 @@ public class OrderService {
     private AddressDetailsService addressDetailsService;
 
 
-    public CartRequestResponse foo(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
+    public CartRequestResponse makeCartEntryToOrders(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
 
         UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
 
@@ -31,27 +32,18 @@ public class OrderService {
         return new CartRequestResponse(orderId);
     }
 
-    public OrderSummaryResponse bar(UUID orderId, String paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
-
-//        if (!isSuccess)
-//            return null;
+    public OrderSummaryResponse confirmOrderPaymentRequest(UUID orderId, String paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
 
         this.confirmOrderPayment(orderId,dateOfPurchase,paymentId);
-        OrderSummaryResponse response =  createResponseForOrderSummary(orderId);
-
-        //TODO
-        //make call to catalog service for updating inventory
-//        final String uri = "https://www.mocky.io/v2/5185415ba171ea3a00704eed";
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.postForObject( uri, response.getProducts(), List.class);
-
-        return response;
+        return createResponseForOrderSummary(orderId);
     }
 
 
     public OrderSummaryResponse createResponseForOrderSummary(UUID orderId){
 
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findById(orderId)
+                        .orElseThrow(()->new OrderNotFoundException(orderId));
+
         OrderSummaryResponse response = new OrderSummaryResponse();
         response.setOrder_id(order.getOrderId());
         response.setDate_of_purchase(order.getDateOfPurchase());
@@ -59,6 +51,19 @@ public class OrderService {
         response.setProducts(orderProductMapService.getAllProductsByOrderId(order.getOrderId()));
         response.setOrderConfirmed(order.isConfirmed());
         response.setPayment_id(order.getPaymentId());
+        return response;
+    }
+
+
+    public List<OrderSummaryResponse> createResponseForAllOrderSummary(){
+
+        Iterable<Order> allOrdersIterable = orderRepository.findAll();
+        List<OrderSummaryResponse> response = new ArrayList<>();
+
+        for(Order order:allOrdersIterable){
+            response.add(createResponseForOrderSummary(order.getOrderId()));
+        }
+
         return response;
     }
 
@@ -90,7 +95,9 @@ public class OrderService {
                     order.setDateOfPurchase(dateOfPurchase);
                     order.setPaymentId(paymentId);
                     return orderRepository.save(order);
-                });
+                }).orElseThrow(()->new OrderNotFoundException(orderId));
 
     }
+
+
 }

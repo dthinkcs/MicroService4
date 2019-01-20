@@ -1,5 +1,7 @@
 package micro_service_4.micro_service_4.Modules;
 
+import micro_service_4.micro_service_4.Exceptions.InvalidParameterException;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,7 +37,7 @@ public class PaymentRequest {
         return orderId;
     }
 
-    public void setOrderId(UUID orderId) {
+    public void setOrderId(UUID orderId)throws Exception{
         this.orderId = orderId;
     }
 
