@@ -14,6 +14,7 @@ import java.util.*;
 
 @Service
 public class OrderService {
+
     @Autowired
     private OrderProductMapService orderProductMapService;
 
@@ -69,9 +70,8 @@ public class OrderService {
         response.setDate_of_purchase(order.getDateOfPurchase());
         response.setAddress(addressDetailsService.getAddressDetails(order.getAddressId()));
         response.setProducts(orderProductMapService.getAllProductsByOrderId(order.getOrderId()));
-        response.setOrderConfirmed(order.isConfirmed());
+        response.setStatus(order.getStatus());
         response.setPayment_id(order.getPaymentId());
-        response.setOrderCancelled(order.getIsOrderCancelled());
         return response;
     }
 
@@ -93,7 +93,7 @@ public class OrderService {
     private UUID saveToOrderTable(Date date_of_purchase, UUID address, Integer total_cost) {
 
         UUID orderId = UUID.randomUUID();
-        Order order = new Order(orderId, date_of_purchase, address, total_cost, false, null);
+        Order order = new Order(orderId, date_of_purchase, address, total_cost,null , Order.Status.Awaiting);
         this.addOrder(order);
 
         return orderId;
@@ -109,7 +109,7 @@ public class OrderService {
 
         orderRepository.findById(orderId)
                 .map(order -> {
-                    order.setConfirmed(true);
+                    order.setStatus(Order.Status.Confirmed);
                     order.setDateOfPurchase(dateOfPurchase);
                     order.setPaymentId(paymentId);
                     return orderRepository.save(order);
@@ -121,7 +121,7 @@ public class OrderService {
 
         orderRepository.findById(orderId)
                 .map(order -> {
-                    order.setIsOrderCancelled(true);
+                    order.setStatus(Order.Status.Cancelled);
                     return orderRepository.save(order);
                 }).orElseThrow(()->new OrderNotFoundException(orderId));
 
