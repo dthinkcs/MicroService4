@@ -18,6 +18,17 @@ public class OrderSummaryResponse {
 
     private String payment_id;
     private Boolean isOrderConfirmed;
+    private Boolean isOrderCancelled;
+
+    public Boolean getOrderCancelled() {
+        return isOrderCancelled;
+    }
+
+    public void setOrderCancelled(Boolean orderCancelled) {
+        isOrderCancelled = orderCancelled;
+    }
+
+
 
     public OrderSummaryResponse(){
 

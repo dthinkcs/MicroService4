@@ -78,6 +78,11 @@ public class OrderController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "/cancelOrder/{orderId}")
+    public void cancelOrderRequest(@PathVariable UUID orderId){
+        orderService.cancelOrderRequest(orderId);
+    }
+
 
 
 

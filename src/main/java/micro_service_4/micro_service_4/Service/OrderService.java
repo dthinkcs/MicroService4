@@ -1,11 +1,15 @@
 package micro_service_4.micro_service_4.Service;
 
+import com.sun.jndi.toolkit.url.Uri;
 import micro_service_4.micro_service_4.Exceptions.OrderNotFoundException;
 import micro_service_4.micro_service_4.Modules.*;
 import micro_service_4.micro_service_4.Repository.OrderRepository;
 import micro_service_4.micro_service_4.Modules.OrderSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
 import java.util.*;
 
 @Service
@@ -22,6 +26,22 @@ public class OrderService {
 
 
     public CartRequestResponse makeCartEntryToOrders(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
+
+
+        String CATALOG_SERVICE_URL = "http://demo0655277.mockable.io/";
+
+        List<String> productIds = new ArrayList<>();
+        for(ProductDetails prod:productDetails)
+            productIds.add(prod.getProductId());
+
+        System.out.println("yha aaya");
+        System.out.println(productIds);
+//        RestTemplate restTemplate = new RestTemplate();
+//        System.out.println(restTemplate.postForLocation(CATALOG_SERVICE_URL, productIds, List.class));
+//        System.out.println(uri);
+
+//        if(true)
+//            return null;
 
         UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
 
@@ -51,6 +71,7 @@ public class OrderService {
         response.setProducts(orderProductMapService.getAllProductsByOrderId(order.getOrderId()));
         response.setOrderConfirmed(order.isConfirmed());
         response.setPayment_id(order.getPaymentId());
+        response.setOrderCancelled(order.getIsOrderCancelled());
         return response;
     }
 
@@ -73,9 +94,6 @@ public class OrderService {
 
         UUID orderId = UUID.randomUUID();
         Order order = new Order(orderId, date_of_purchase, address, total_cost, false, null);
-        System.out.println(order.getOrderId());
-        System.out.println(order.getDateOfPurchase());
-        System.out.println(this);
         this.addOrder(order);
 
         return orderId;
@@ -94,6 +112,16 @@ public class OrderService {
                     order.setConfirmed(true);
                     order.setDateOfPurchase(dateOfPurchase);
                     order.setPaymentId(paymentId);
+                    return orderRepository.save(order);
+                }).orElseThrow(()->new OrderNotFoundException(orderId));
+
+    }
+
+    public void cancelOrderRequest(UUID orderId){
+
+        orderRepository.findById(orderId)
+                .map(order -> {
+                    order.setIsOrderCancelled(true);
                     return orderRepository.save(order);
                 }).orElseThrow(()->new OrderNotFoundException(orderId));
 

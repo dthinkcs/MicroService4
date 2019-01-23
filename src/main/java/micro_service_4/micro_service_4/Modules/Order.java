@@ -22,6 +22,17 @@ public class Order {
     private Boolean isConfirmed;
     @Column(name="paymentid")
     private String paymentId;
+    @Column(name="isordercancelled")
+    private Boolean isOrderCancelled;
+
+    public Boolean getIsOrderCancelled() {
+        return isOrderCancelled;
+    }
+
+    public void setIsOrderCancelled(Boolean isOrderCancelled) {
+        this.isOrderCancelled = isOrderCancelled;
+    }
+
 
 
     public Order() {
