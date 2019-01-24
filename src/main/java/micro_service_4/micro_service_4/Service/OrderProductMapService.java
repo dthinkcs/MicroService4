@@ -20,7 +20,7 @@ public class OrderProductMapService {
     }
 
 
-    List<ProductDetails> getAllProductsByOrderId(UUID orderId) {
+    public  List<ProductDetails> getAllProductsByOrderId(UUID orderId) {
 
         List<OrderProductMap> allOrderProducts = ordermaprepository.findAllProductsByOrderId(orderId);
 

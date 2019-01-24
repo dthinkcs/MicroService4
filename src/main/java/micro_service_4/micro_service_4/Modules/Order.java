@@ -1,14 +1,14 @@
 package micro_service_4.micro_service_4.Modules;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 @Entity
 @Table(name="ordertable") // table make TODO
 public class Order {
+    public enum Status {
+        Awaiting ,Confirmed , Cancelled , OutForDelivery , Delivered
+    }
     @Id
     @Column(name="orderid")
     private UUID orderId ;
@@ -18,39 +18,23 @@ public class Order {
     private UUID addressId;
     @Column(name="totalcost")
     private Integer totalCost;
-    @Column(name="isconfirmed")
-    private Boolean isConfirmed;
     @Column(name="paymentid")
     private String paymentId;
-    @Column(name="isordercancelled")
-    private Boolean isOrderCancelled;
-
-    public Boolean getIsOrderCancelled() {
-        return isOrderCancelled;
-    }
-
-    public void setIsOrderCancelled(Boolean isOrderCancelled) {
-        this.isOrderCancelled = isOrderCancelled;
-    }
-
-
+    @Enumerated(EnumType.STRING)
+    @Column(name="status")
+    private Status status;
 
     public Order() {
 
     }
 
-    public Order(UUID orderId, Date dateOfPurchase, UUID addressId, Integer totalCost, Boolean isConfirmed, String paymentId) {
+    public Order(UUID orderId, Date dateOfPurchase, UUID addressId, Integer totalCost, String paymentId, Status status) {
         this.orderId = orderId;
         this.dateOfPurchase = dateOfPurchase;
         this.addressId = addressId;
         this.totalCost = totalCost;
-        this.isConfirmed = isConfirmed;
         this.paymentId = paymentId;
-    }
-
-
-    public Boolean isConfirmed() {
-        return isConfirmed;
+        this.status = status;
     }
 
     public UUID getOrderId() {
@@ -69,9 +53,13 @@ public class Order {
         return totalCost;
     }
 
-    public Boolean getConfirmed() { return isConfirmed; }
+    public String getPaymentId() {
+        return paymentId;
+    }
 
-    public String getPaymentId() { return paymentId; }
+    public Status getStatus() {
+        return status;
+    }
 
     public void setOrderId(UUID orderId) {
         this.orderId = orderId;
@@ -89,10 +77,11 @@ public class Order {
         this.totalCost = totalCost;
     }
 
-    public void setConfirmed(Boolean confirmed) {
-        isConfirmed = confirmed;
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
-
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

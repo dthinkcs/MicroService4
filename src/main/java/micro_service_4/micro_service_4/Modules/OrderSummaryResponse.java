@@ -17,79 +17,59 @@ public class OrderSummaryResponse {
     private AddressDetails address;
 
     private String payment_id;
-    private Boolean isOrderConfirmed;
-    private Boolean isOrderCancelled;
-
-    public Boolean getOrderCancelled() {
-        return isOrderCancelled;
-    }
-
-    public void setOrderCancelled(Boolean orderCancelled) {
-        isOrderCancelled = orderCancelled;
-    }
-
+    private Order.Status status;
 
 
     public OrderSummaryResponse(){
 
     }
 
-    public OrderSummaryResponse(UUID order_id, List<ProductDetails> products, Date date_of_purchase, AddressDetails address, String payment_id) {
-        this.order_id = order_id;
-        this.products = products;
-        this.date_of_purchase = date_of_purchase;
-        this.address = address;
-        this.payment_id = payment_id;
-    }
-
-    public Boolean getOrderConfirmed() {
-        return isOrderConfirmed;
-    }
-
-    public void setOrderConfirmed(Boolean orderConfirmed) {
-        isOrderConfirmed = orderConfirmed;
-    }
 
     public UUID getOrder_id() {
         return order_id;
-    }
-
-    public void setOrder_id(UUID order_id) {
-        this.order_id = order_id;
     }
 
     public List<ProductDetails> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductDetails> products) {
-        this.products = products;
-    }
-
     public Date getDate_of_purchase() {
         return date_of_purchase;
-    }
-
-    public void setDate_of_purchase(Date date_of_purchase) {
-        this.date_of_purchase = date_of_purchase;
     }
 
     public AddressDetails getAddress() {
         return address;
     }
 
-    public void setAddress(AddressDetails address) {
-        this.address = address;
-    }
-
     public String getPayment_id() {
         return payment_id;
+    }
+
+    public Order.Status getStatus() {
+        return status;
+    }
+
+    public void setOrder_id(UUID order_id) {
+        this.order_id = order_id;
+    }
+
+    public void setProducts(List<ProductDetails> products) {
+        this.products = products;
+    }
+
+    public void setDate_of_purchase(Date date_of_purchase) {
+        this.date_of_purchase = date_of_purchase;
+    }
+
+    public void setAddress(AddressDetails address) {
+        this.address = address;
     }
 
     public void setPayment_id(String payment_id) {
         this.payment_id = payment_id;
     }
 
-
-
+    public void setStatus(Order.Status status) {
+        this.status = status;
+    }
 }
