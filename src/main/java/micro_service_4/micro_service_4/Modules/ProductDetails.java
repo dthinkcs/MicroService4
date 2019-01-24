@@ -65,6 +65,6 @@ public class ProductDetails {
 
     @Override
     public String toString() {
-        return "[" + this.productName + "," + this.brand + "," + this.price + "," + this.quantity + "]";
+        return "[" + this.productId + "," + this.brand + "," + this.price + "," + this.quantity + "]";
     }
 }

@@ -1,16 +1,13 @@
 package micro_service_4.micro_service_4.Modules;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 @Entity
 @Table(name="ordertable") // table make TODO
 public class Order {
     public enum Status {
-        Awaiting ,Confirmed , Cancelled , OutForDelivery
+        Awaiting ,Confirmed , Cancelled , OutForDelivery , Delivered
     }
     @Id
     @Column(name="orderid")
@@ -23,6 +20,7 @@ public class Order {
     private Integer totalCost;
     @Column(name="paymentid")
     private String paymentId;
+    @Enumerated(EnumType.STRING)
     @Column(name="status")
     private Status status;
 

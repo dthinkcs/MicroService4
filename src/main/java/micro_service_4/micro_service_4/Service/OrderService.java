@@ -126,6 +126,24 @@ public class OrderService {
                 }).orElseThrow(()->new OrderNotFoundException(orderId));
 
     }
+    public void updateOrderRequestToOFD(UUID orderId){
 
+        orderRepository.findById(orderId)
+                .map(order -> {
+                    order.setStatus(Order.Status.OutForDelivery);
+                    return orderRepository.save(order);
+                }).orElseThrow(()->new OrderNotFoundException(orderId));
+
+    }
+
+    public void updateOrderRequestToD(UUID orderId){
+
+        orderRepository.findById(orderId)
+                .map(order -> {
+                    order.setStatus(Order.Status.Delivered);
+                    return orderRepository.save(order);
+                }).orElseThrow(()->new OrderNotFoundException(orderId));
+
+    }
 
 }
