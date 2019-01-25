@@ -4,14 +4,14 @@ import java.util.List;
 
 public class UpdateQuantity {
 private Boolean toReduce;
- private List<ProductDetails> productIds;
+ private List<IndividualProductQuantity> productIds;
 
 
     public UpdateQuantity() {
     }
 
-    public UpdateQuantity(Boolean flag, List<ProductDetails> productIds) {
-        this.toReduce = flag;
+    public UpdateQuantity(Boolean toReduce, List<IndividualProductQuantity> productIds) {
+        this.toReduce = toReduce;
         this.productIds = productIds;
     }
 
@@ -19,7 +19,7 @@ private Boolean toReduce;
         return toReduce;
     }
 
-    public List<ProductDetails> getProductIds() {
+    public List<IndividualProductQuantity> getProductIds() {
         return productIds;
     }
 
@@ -27,7 +27,7 @@ private Boolean toReduce;
         this.toReduce = toReduce;
     }
 
-    public void setProductIds(List<ProductDetails> productIds) {
+    public void setProductIds(List<IndividualProductQuantity> productIds) {
         this.productIds = productIds;
     }
 }
