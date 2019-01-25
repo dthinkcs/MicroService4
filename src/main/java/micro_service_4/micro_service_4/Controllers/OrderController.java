@@ -1,28 +1,17 @@
 package micro_service_4.micro_service_4.Controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
 import micro_service_4.micro_service_4.Modules.*;
 import micro_service_4.micro_service_4.Service.AddressDetailsService;
 import micro_service_4.micro_service_4.Service.OrderProductMapService;
 import micro_service_4.micro_service_4.Service.OrderService;
 
-import org.apache.coyote.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import springfox.documentation.spring.web.json.Json;
 
-import java.io.DataInput;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,8 +95,15 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation/")
     public OrderSummaryResponse confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
-       /* List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
-        UpdateQuantity quantity = new UpdateQuantity(true,productList);
+
+        List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
+        List<IndividualProductQuantity> individual= new ArrayList<>();
+        for(ProductDetails productDetails : productList){
+            IndividualProductQuantity ind =new IndividualProductQuantity(productDetails.getProductId(),productDetails.getQuantity());
+            individual.add(ind);
+       }
+        UpdateQuantity quantity = new UpdateQuantity(true,individual);
+       /* System.out.println(quantity.getProductIds().get(1).getProductIDs());
         final String uri = "http://gourav1.localhost.run/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
         UpdateQuantity result = restTemplate.postForObject( uri, quantity, UpdateQuantity.class);
