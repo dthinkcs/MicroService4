@@ -15,6 +15,12 @@ public class ProductDetails {
 
     }
 
+    public ProductDetails(String productId, Integer quantity) {
+        this.productId = productId;
+        this.quantity = quantity;
+    }
+
+
     public ProductDetails(String productId,String productName, String brand, Integer price, Integer quantity) {
         this.productId = productId;
         this.productName = productName;

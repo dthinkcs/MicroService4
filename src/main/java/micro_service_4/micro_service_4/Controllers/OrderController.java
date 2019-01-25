@@ -6,16 +6,22 @@ import micro_service_4.micro_service_4.Service.AddressDetailsService;
 import micro_service_4.micro_service_4.Service.OrderProductMapService;
 import micro_service_4.micro_service_4.Service.OrderService;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @RestController
@@ -77,8 +83,6 @@ public class OrderController {
 
         }
 
-
-
         addressDetailsService.addAddressDetails(request.getAddress());
         return orderService.makeCartEntryToOrders
                 (
@@ -92,25 +96,10 @@ public class OrderController {
 
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation/")
+    @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation")
     public OrderSummaryResponse confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
-
-        List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
-        List<IndividualProductQuantity> individual= new ArrayList<>();
-        for(ProductDetails productDetails : productList){
-            IndividualProductQuantity ind =new IndividualProductQuantity(productDetails.getProductId(),productDetails.getQuantity());
-            individual.add(ind);
-       }
-        UpdateQuantity quantity = new UpdateQuantity(true,individual);
-       /* System.out.println(quantity.getProductIds().get(1).getProductIDs());
-        final String uri = "http://gourav1.localhost.run/updateQuantity";
-        RestTemplate restTemplate = new RestTemplate();
-        UpdateQuantity result = restTemplate.postForObject( uri, quantity, UpdateQuantity.class);
-
-        System.out.println(result);
-*/
-        return orderService.confirmOrderPaymentRequest
+        OrderSummaryResponse response = orderService.confirmOrderPaymentRequest
                 (
                         request.getOrderId(),
                         request.getPaymentId(),
@@ -118,6 +107,25 @@ public class OrderController {
                         request.getModeOfPayment(),
                         request.getSuccess()
                 );
+
+        List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
+
+        UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
+        final String uri = "http://gourav9.localhost.run/updateQuantity";
+        RestTemplate restTemplate = new RestTemplate();
+        System.out.println("yha aakr ruka");
+        System.out.println(updateQuantity.getProductIds());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<UpdateQuantity> entity = new HttpEntity<>(updateQuantity,headers);
+
+        String resp = restTemplate.postForObject(uri,entity,String.class);
+        System.out.println(resp);
+        System.out.println("hi");
+
+//        System.out.println(res.toString());
+
+        return response;
 
 
     }
@@ -151,6 +159,10 @@ public class OrderController {
     public void updateOrderStatusToD(@PathVariable UUID orderId){
         orderService.updateOrderRequestToD(orderId);
     }
+
+
+
+
 
 
 
