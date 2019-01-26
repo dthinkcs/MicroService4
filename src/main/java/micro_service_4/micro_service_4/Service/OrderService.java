@@ -76,6 +76,9 @@ public class OrderService {
     }
 
 
+
+
+
     public List<OrderSummaryResponse> createResponseForAllOrderSummary(){
 
         Iterable<Order> allOrdersIterable = orderRepository.findAll();
@@ -146,4 +149,21 @@ public class OrderService {
 
     }
 
+    public PaymentOrderResponse getResponseForPaymentService(UUID orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(()->new OrderNotFoundException(orderId));
+
+        List<ProductDetails> productDetails =orderProductMapService.getAllProductsByOrderId(order.getOrderId());
+
+        List<String> productIds =new ArrayList<>();
+
+        for(ProductDetails prod:productDetails){
+            productIds.add(prod.getProductId());
+        }
+
+        return new PaymentOrderResponse(orderId,productIds,order.getTotalCost());
+
+
+    }
 }

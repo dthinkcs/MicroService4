@@ -8,20 +8,13 @@ import micro_service_4.micro_service_4.Service.OrderService;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
-import java.security.InvalidParameterException;
 import java.util.*;
 
 
@@ -64,11 +57,29 @@ public class OrderController {
 //        List<ProductDetails> productList = response.getBody();
 
         List<ProductDetails> validate_products= request.getProducts();
+        List<String> requestToValidate = new ArrayList<>();
+
+        for(ProductDetails prod: validate_products){
+            requestToValidate.add(prod.getProductId().toString());
+        }
+
         RestTemplate restTemplate = new RestTemplate();
-        String productList = restTemplate.getForObject("http://demo3541090.mockable.io/",String.class);
+//        String productList = restTemplate.getForObject("http://gourav.localhost.run/getProductsById",String.class);
+
+        final String uri ="http://gourav.localhost.run/getProductsById";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<List> entity = new HttpEntity<>(requestToValidate,headers);
+
+        String productList = restTemplate.postForObject(uri,entity,String.class);
+
+        System.out.println("hogya");
         System.out.println(productList);
         JSONObject obj = new JSONObject(productList);
-        JSONArray arr =obj.getJSONArray("products");
+        JSONArray arr = obj.getJSONArray("responseData");
+        System.out.println(arr);
+
+
         ObjectMapper mapper = new ObjectMapper();
         for(int i=0;i<arr.length();i++){
 
@@ -111,7 +122,7 @@ public class OrderController {
         List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
-        final String uri = "http://gourav9.localhost.run/updateQuantity";
+        final String uri = "http://gourav.localhost.run/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
         System.out.println("yha aakr ruka");
         System.out.println(updateQuantity.getProductIds());
@@ -120,8 +131,8 @@ public class OrderController {
         HttpEntity<UpdateQuantity> entity = new HttpEntity<>(updateQuantity,headers);
 
         String resp = restTemplate.postForObject(uri,entity,String.class);
+        System.out.println("yha to aagya");
         System.out.println(resp);
-        System.out.println("hi");
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
 
@@ -132,7 +143,7 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/{orderId}")
     public ResponseEntity<CustomResponse> postOrderSummary(@PathVariable("orderId") UUID orderId){
 
-        OrderSummaryResponse orderSummaryResponse =  orderService.createResponseForOrderSummary(orderId);
+        OrderSummaryResponse orderSummaryResponse = orderService.createResponseForOrderSummary(orderId);
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",orderSummaryResponse));
     }
@@ -143,8 +154,6 @@ public class OrderController {
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
     }
-
-
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/cancelOrder/{orderId}")
@@ -168,9 +177,20 @@ public class OrderController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value= "/orderDetails/{orderIdString}")
+    public ResponseEntity<CustomResponse> getOrderDetailsForPayment(@PathVariable String orderIdString){
+
+        UUID orderId;
+        try{
+            orderId = UUID.fromString(orderIdString);
+        }catch (Exception e){
+            return ResponseEntity.status(200).body(new CustomResponse(500,"Invalid Orderid",null));
+        }
+
+        PaymentOrderResponse paymentOrderResponse = orderService.getResponseForPaymentService(orderId);
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All Okay",paymentOrderResponse));
 
 
-
-
+    }
 
 }
