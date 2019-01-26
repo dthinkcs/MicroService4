@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -35,21 +36,22 @@ public class OrderController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry/")
-    public CartRequestResponse addCartEntry(@RequestBody CartRequest request) throws Exception {
+    public ResponseEntity<CustomResponse> addCartEntry(@RequestBody CartRequest request) throws Exception {
 
+        //CartRequestResponse
         if(request.getProducts().size() == 0)
-            throw new Exception(new InvalidParameterException("No products Found"));
+                return ResponseEntity.status(200).body(new CustomResponse(404,"No products Found",null));
 
         if(request.getTotalCost() == 0)
-            throw new Exception(new InvalidParameterException("Zero total Cost not allowed"));
+            return ResponseEntity.status(200).body(new CustomResponse(500,"Zero total Cost not allowed  ",null));
 
         if(request.getAddress().getPinCode() == null || request.getAddress().getPinCode().equals(""))
-            throw new Exception(new InvalidParameterException("Pin Code required"));
+            return ResponseEntity.status(200).body(new CustomResponse(500,"Pin Code required",null));
 
         for(ProductDetails prodDetail: request.getProducts()){
 
             if(prodDetail.getQuantity() <= 0 ){
-                throw new Exception(new InvalidParameterException("Zero product Quantity not allowed"));
+                return ResponseEntity.status(200).body(new CustomResponse(500,"Zero product Quantity not allowed",null));
             }
         }
 
@@ -63,7 +65,7 @@ public class OrderController {
 
         List<ProductDetails> validate_products= request.getProducts();
         RestTemplate restTemplate = new RestTemplate();
-        String productList = restTemplate.getForObject("http://demo0655277.mockable.io/",String.class);
+        String productList = restTemplate.getForObject("http://demo3541090.mockable.io/",String.class);
         System.out.println(productList);
         JSONObject obj = new JSONObject(productList);
         JSONArray arr =obj.getJSONArray("products");
@@ -72,19 +74,17 @@ public class OrderController {
 
             ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
 
-            /*System.out.println(prod.getProductId());
-            System.out.println(validate_products.get(i).getProductId());*/
             if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
-                throw new Exception(new InvalidParameterException("Product Id doesn't match"));
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
             if(!prod.getQuantity().equals(validate_products.get(i).getQuantity()))
-                throw new Exception(new InvalidParameterException("Quantity doesn't match"));
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
             if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
-                throw new Exception(new InvalidParameterException("Price has been changed"));
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
 
         }
 
         addressDetailsService.addAddressDetails(request.getAddress());
-        return orderService.makeCartEntryToOrders
+        CartRequestResponse cartRequestResponse = orderService.makeCartEntryToOrders
                 (
                         request.getCartId(),
                         request.getProducts(),
@@ -92,12 +92,12 @@ public class OrderController {
                         request.getTotalCost()
                 );
 
-
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",cartRequestResponse));
 
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation")
-    public OrderSummaryResponse confirmPaymentForOrder(@RequestBody PaymentRequest request) {
+    public ResponseEntity<CustomResponse> confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
         OrderSummaryResponse response = orderService.confirmOrderPaymentRequest
                 (
@@ -123,41 +123,48 @@ public class OrderController {
         System.out.println(resp);
         System.out.println("hi");
 
-//        System.out.println(res.toString());
-
-        return response;
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
 
 
     }
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/{orderId}")
-    public OrderSummaryResponse postOrderSummary(@PathVariable("orderId") UUID orderId){
+    public ResponseEntity<CustomResponse> postOrderSummary(@PathVariable("orderId") UUID orderId){
 
-        return orderService.createResponseForOrderSummary(orderId);
+        OrderSummaryResponse orderSummaryResponse =  orderService.createResponseForOrderSummary(orderId);
 
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",orderSummaryResponse));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/")
-    public List<OrderSummaryResponse> postAllOrderSummary(){
+    public ResponseEntity<CustomResponse> postAllOrderSummary(){
+        List<OrderSummaryResponse> response =  orderService.createResponseForAllOrderSummary();
 
-        return orderService.createResponseForAllOrderSummary();
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
     }
+
+
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/cancelOrder/{orderId}")
-    public void cancelOrderRequest(@PathVariable UUID orderId){
+    public ResponseEntity<CustomResponse> cancelOrderRequest(@PathVariable UUID orderId){
         orderService.cancelOrderRequest(orderId);
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",null));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/changeStatusToOFD/{orderId}")
-    public void updateOrderStatusToOFD(@PathVariable UUID orderId){
+    public ResponseEntity<CustomResponse> updateOrderStatusToOFD(@PathVariable UUID orderId)
+    {
         orderService.updateOrderRequestToOFD(orderId);
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",null));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/changeStatusToD/{orderId}")
-    public void updateOrderStatusToD(@PathVariable UUID orderId){
+    public ResponseEntity<CustomResponse> updateOrderStatusToD(@PathVariable UUID orderId)
+    {
         orderService.updateOrderRequestToD(orderId);
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",null));
     }
 
 
