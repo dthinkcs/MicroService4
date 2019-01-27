@@ -28,9 +28,11 @@ public class OrderController {
     private OrderProductMapService orderProductMapService ;
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry/")
+    @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry")
     public ResponseEntity<CustomResponse> addCartEntry(@RequestBody CartRequest request) throws Exception {
 
+        System.out.println("frontend se call aai");
+        System.out.println(request.getAddress());
         //CartRequestResponse
         if(request.getProducts().size() == 0)
                 return ResponseEntity.status(200).body(new CustomResponse(404,"No products Found",null));
@@ -48,14 +50,7 @@ public class OrderController {
             }
         }
 
-//        ResponseEntity<Object> response = restTemplate.exchange(
-//                "http://demo0655277.mockable.io/",
-//                HttpMethod.GET,
-//                null,
-//                new ParameterizedTypeReference<List<ProductDetails>>(){});
-//        System.out.print();
-//        List<ProductDetails> productList = response.getBody();
-
+        System.out.println("1");
         List<ProductDetails> validate_products= request.getProducts();
         List<String> requestToValidate = new ArrayList<>();
 
@@ -64,9 +59,9 @@ public class OrderController {
         }
 
         RestTemplate restTemplate = new RestTemplate();
-//        String productList = restTemplate.getForObject("http://gourav.localhost.run/getProductsById",String.class);
 
-        final String uri ="http://gourav.localhost.run/getProductsById";
+        System.out.println("2");
+        final String uri ="http://d69750df.ngrok.io/getProductsById";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List> entity = new HttpEntity<>(requestToValidate,headers);
@@ -81,19 +76,20 @@ public class OrderController {
 
 
         ObjectMapper mapper = new ObjectMapper();
-        for(int i=0;i<arr.length();i++){
+//        for(int i=0;i<arr.length();i++){
+//
+//            ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
+//
+//            if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
+//                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
+//            if(prod.getQuantity()>validate_products.get(i).getQuantity())
+//                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
+//            if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
+//                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
+//
+//        }
 
-            ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
-
-            if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
-            if(!prod.getQuantity().equals(validate_products.get(i).getQuantity()))
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
-            if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
-
-        }
-
+        System.out.println("3");
         addressDetailsService.addAddressDetails(request.getAddress());
         CartRequestResponse cartRequestResponse = orderService.makeCartEntryToOrders
                 (
@@ -110,6 +106,7 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation")
     public ResponseEntity<CustomResponse> confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
+        System.out.println("payment se aai request");
         OrderSummaryResponse response = orderService.confirmOrderPaymentRequest
                 (
                         request.getOrderId(),
@@ -118,11 +115,12 @@ public class OrderController {
                         request.getModeOfPayment(),
                         request.getSuccess()
                 );
+        System.out.println("1");
 
         List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
-        final String uri = "http://gourav.localhost.run/updateQuantity";
+        final String uri = "http://d69750df.ngrok.io/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
         System.out.println("yha aakr ruka");
         System.out.println(updateQuantity.getProductIds());
@@ -148,7 +146,7 @@ public class OrderController {
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",orderSummaryResponse));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/")
+    @RequestMapping(method = RequestMethod.GET, value = "/orderSummary")
     public ResponseEntity<CustomResponse> postAllOrderSummary(){
         List<OrderSummaryResponse> response =  orderService.createResponseForAllOrderSummary();
 

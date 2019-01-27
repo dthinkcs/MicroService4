@@ -82,4 +82,9 @@ public class AddressDetails {
     public Integer getPinCode() {
         return pinCode;
     }
+
+    @Override
+    public String toString() {
+        return this.getStreet() + "," + this.getPinCode() + "," + this.getCity();
+    }
 }
