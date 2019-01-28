@@ -61,7 +61,7 @@ public class OrderController {
         RestTemplate restTemplate = new RestTemplate();
 
         System.out.println("2");
-        final String uri ="http://d69750df.ngrok.io/getProductsById";
+        final String uri ="https://bde8a250.ngrok.io/getProductsById";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List> entity = new HttpEntity<>(requestToValidate,headers);
@@ -76,18 +76,18 @@ public class OrderController {
 
 
         ObjectMapper mapper = new ObjectMapper();
-//        for(int i=0;i<arr.length();i++){
-//
-//            ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
-//
-//            if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
-//                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
-//            if(prod.getQuantity()>validate_products.get(i).getQuantity())
-//                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
-//            if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
-//                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
-//
-//        }
+        for(int i=0;i<arr.length();i++){
+
+            ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
+
+            if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
+            if(prod.getQuantity()<validate_products.get(i).getQuantity())
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
+            if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
+                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
+
+        }
 
         System.out.println("3");
         addressDetailsService.addAddressDetails(request.getAddress());
@@ -120,7 +120,7 @@ public class OrderController {
         List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
-        final String uri = "http://d69750df.ngrok.io/updateQuantity";
+        final String uri = "https://bde8a250.ngrok.io/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
         System.out.println("yha aakr ruka");
         System.out.println(updateQuantity.getProductIds());
@@ -131,6 +131,10 @@ public class OrderController {
         String resp = restTemplate.postForObject(uri,entity,String.class);
         System.out.println("yha to aagya");
         System.out.println(resp);
+
+
+        final String emptyCartUri = "https://cb289950.ngrok.io/cart/emptyCart";
+        restTemplate.delete(emptyCartUri);
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
 

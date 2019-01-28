@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name="addressdetails") // make table TODO
+@Table(name="addressdetails")
 public class AddressDetails {
     @Id
     @Column(name="addressid")

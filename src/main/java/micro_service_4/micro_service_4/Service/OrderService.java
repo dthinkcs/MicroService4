@@ -1,5 +1,6 @@
 package micro_service_4.micro_service_4.Service;
 
+import com.google.common.collect.Lists;
 import com.sun.jndi.toolkit.url.Uri;
 import micro_service_4.micro_service_4.Exceptions.OrderNotFoundException;
 import micro_service_4.micro_service_4.Modules.*;
@@ -84,7 +85,10 @@ public class OrderService {
         Iterable<Order> allOrdersIterable = orderRepository.findAll();
         List<OrderSummaryResponse> response = new ArrayList<>();
 
-        for(Order order:allOrdersIterable){
+        List<Order> mlist = Lists.newArrayList(allOrdersIterable);
+        Collections.reverse(mlist);
+
+        for(Order order:mlist){
             response.add(createResponseForOrderSummary(order.getOrderId()));
         }
 
@@ -121,9 +125,6 @@ public class OrderService {
     }
 
     public void cancelOrderRequest(UUID orderId){
-
-
-
 
         orderRepository.findById(orderId)
                 .map(order -> {
