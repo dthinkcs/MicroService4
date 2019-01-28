@@ -50,17 +50,15 @@ public class OrderController {
             }
         }
 
-        System.out.println("1");
         List<ProductDetails> validate_products= request.getProducts();
         List<String> requestToValidate = new ArrayList<>();
 
         for(ProductDetails prod: validate_products){
-            requestToValidate.add(prod.getProductId().toString());
+            requestToValidate.add(prod.getProductId());
         }
 
         RestTemplate restTemplate = new RestTemplate();
 
-        System.out.println("2");
         final String uri ="https://bde8a250.ngrok.io/getProductsById";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -68,14 +66,12 @@ public class OrderController {
 
         String productList = restTemplate.postForObject(uri,entity,String.class);
 
-        System.out.println("hogya");
-        System.out.println(productList);
         JSONObject obj = new JSONObject(productList);
         JSONArray arr = obj.getJSONArray("responseData");
-        System.out.println(arr);
 
 
         ObjectMapper mapper = new ObjectMapper();
+        int totalCost =0;
         for(int i=0;i<arr.length();i++){
 
             ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
@@ -87,9 +83,14 @@ public class OrderController {
             if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
                 return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
 
+
+            totalCost += validate_products.get(i).getPrice() * validate_products.get(i).getQuantity();
         }
 
-        System.out.println("3");
+        if(totalCost != request.getTotalCost()){
+            return ResponseEntity.status(200).body(new CustomResponse(403,"Total cost is incorrect",null));
+        }
+
         addressDetailsService.addAddressDetails(request.getAddress());
         CartRequestResponse cartRequestResponse = orderService.makeCartEntryToOrders
                 (
@@ -106,7 +107,6 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation")
     public ResponseEntity<CustomResponse> confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
-        System.out.println("payment se aai request");
         OrderSummaryResponse response = orderService.confirmOrderPaymentRequest
                 (
                         request.getOrderId(),
@@ -115,26 +115,17 @@ public class OrderController {
                         request.getModeOfPayment(),
                         request.getSuccess()
                 );
-        System.out.println("1");
 
         List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
         final String uri = "https://bde8a250.ngrok.io/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
-        System.out.println("yha aakr ruka");
-        System.out.println(updateQuantity.getProductIds());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<UpdateQuantity> entity = new HttpEntity<>(updateQuantity,headers);
 
         String resp = restTemplate.postForObject(uri,entity,String.class);
-        System.out.println("yha to aagya");
-        System.out.println(resp);
-
-
-        final String emptyCartUri = "https://cb289950.ngrok.io/cart/emptyCart";
-        restTemplate.delete(emptyCartUri);
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",response));
 
@@ -161,6 +152,13 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.GET, value = "/cancelOrder/{orderId}")
     public ResponseEntity<CustomResponse> cancelOrderRequest(@PathVariable UUID orderId){
         orderService.cancelOrderRequest(orderId);
+
+        final String cancelOrderRequest = "https://ff3b33d3.ngrok.io/payment/cancel/" + orderId;
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getForObject(cancelOrderRequest,String.class);
+
+
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",null));
     }
 

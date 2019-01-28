@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.sun.jndi.toolkit.url.Uri;
 import micro_service_4.micro_service_4.Exceptions.OrderNotFoundException;
 import micro_service_4.micro_service_4.Modules.*;
+import micro_service_4.micro_service_4.Repository.OrderCartMapRepository;
 import micro_service_4.micro_service_4.Repository.OrderRepository;
 import micro_service_4.micro_service_4.Modules.OrderSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +27,9 @@ public class OrderService {
 
     @Autowired
     private AddressDetailsService addressDetailsService;
+
+    @Autowired
+    private OrderCartMapRepository orderCartMapRepository;
 
 
     public CartRequestResponse makeCartEntryToOrders(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
@@ -45,7 +50,18 @@ public class OrderService {
 //        if(true)
 //            return null;
 
+
         UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
+
+        System.out.println(cartId);
+
+//        if(cartId.length() == 0)
+//            cartId = null;
+
+        OrderCartMap orderCartMap = new OrderCartMap(orderId,cartId);
+        orderCartMapRepository.save(orderCartMap);
+
+
 
         for (ProductDetails prod : productDetails) {
             orderProductMapService.saveToOrderProductMap(orderId, prod.getProductId(), prod.getProductName(), prod.getQuantity(), prod.getPrice());
@@ -55,6 +71,15 @@ public class OrderService {
     }
 
     public OrderSummaryResponse confirmOrderPaymentRequest(UUID orderId, String paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
+
+        OrderCartMap orderCartMap = orderCartMapRepository.findById(orderId).get();
+
+        System.out.println("cart id is " + orderCartMap.getCartId());
+        if(orderCartMap.getCartId().length() != 0) {
+            RestTemplate restTemplate = new RestTemplate();
+            final String emptyCartUri = "https://cb289950.ngrok.io/cart/emptyCart";
+            restTemplate.delete(emptyCartUri);
+        }
 
         this.confirmOrderPayment(orderId,dateOfPurchase,paymentId);
         return createResponseForOrderSummary(orderId);
