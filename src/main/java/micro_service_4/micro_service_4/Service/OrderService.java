@@ -34,34 +34,10 @@ public class OrderService {
 
     public CartRequestResponse makeCartEntryToOrders(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
 
-
-        String CATALOG_SERVICE_URL = "http://demo0655277.mockable.io/";
-
-        List<String> productIds = new ArrayList<>();
-        for(ProductDetails prod:productDetails)
-            productIds.add(prod.getProductId());
-
-        System.out.println("yha aaya");
-        System.out.println(productIds);
-//        RestTemplate restTemplate = new RestTemplate();
-//        System.out.println(restTemplate.postForLocation(CATALOG_SERVICE_URL, productIds, List.class));
-//        System.out.println(uri);
-
-//        if(true)
-//            return null;
-
-
         UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
-
-        System.out.println(cartId);
-
-//        if(cartId.length() == 0)
-//            cartId = null;
 
         OrderCartMap orderCartMap = new OrderCartMap(orderId,cartId);
         orderCartMapRepository.save(orderCartMap);
-
-
 
         for (ProductDetails prod : productDetails) {
             orderProductMapService.saveToOrderProductMap(orderId, prod.getProductId(), prod.getProductName(), prod.getQuantity(), prod.getPrice());
@@ -74,7 +50,6 @@ public class OrderService {
 
         OrderCartMap orderCartMap = orderCartMapRepository.findById(orderId).get();
 
-        System.out.println("cart id is " + orderCartMap.getCartId());
         if(orderCartMap.getCartId().length() != 0) {
             RestTemplate restTemplate = new RestTemplate();
             final String emptyCartUri = "https://cb289950.ngrok.io/cart/emptyCart";
@@ -100,10 +75,6 @@ public class OrderService {
         response.setPayment_id(order.getPaymentId());
         return response;
     }
-
-
-
-
 
     public List<OrderSummaryResponse> createResponseForAllOrderSummary(){
 
@@ -131,7 +102,6 @@ public class OrderService {
         return orderId;
 
     }
-
 
     private void addOrder(Order order) {
         orderRepository.save(order);
@@ -184,7 +154,6 @@ public class OrderService {
                 .orElseThrow(()->new OrderNotFoundException(orderId));
 
         List<ProductDetails> productDetails =orderProductMapService.getAllProductsByOrderId(order.getOrderId());
-
         List<String> productIds =new ArrayList<>();
 
         for(ProductDetails prod:productDetails){
