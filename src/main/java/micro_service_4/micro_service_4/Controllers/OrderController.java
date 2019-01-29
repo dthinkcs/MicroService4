@@ -28,12 +28,14 @@ public class OrderController {
     private OrderProductMapService orderProductMapService ;
 
 
+    // make order summary when user checks out cart or clicks on buy now
     @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry")
     public ResponseEntity<CustomResponse> addCartEntry(@RequestBody CartRequest request) throws Exception {
 
         System.out.println("frontend se call aai");
         System.out.println(request.getAddress());
-        //CartRequestResponse
+
+        //basic validations on data sent in the request
         if(request.getProducts().size() == 0)
                 return ResponseEntity.status(200).body(new CustomResponse(404,"No products Found",null));
 
@@ -59,7 +61,7 @@ public class OrderController {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        final String uri ="https://bde8a250.ngrok.io/getProductsById";
+        final String uri ="http://10.10.212.75:8080/getProductsById";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List> entity = new HttpEntity<>(requestToValidate,headers);
@@ -72,6 +74,8 @@ public class OrderController {
 
         ObjectMapper mapper = new ObjectMapper();
         int totalCost =0;
+
+        //validations on data after fetching data from catalog service
         for(int i=0;i<arr.length();i++){
 
             ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
@@ -91,6 +95,7 @@ public class OrderController {
             return ResponseEntity.status(200).body(new CustomResponse(403,"Total cost is incorrect",null));
         }
 
+        //saving address and making the call to order service to make order entry to db
         addressDetailsService.addAddressDetails(request.getAddress());
         CartRequestResponse cartRequestResponse = orderService.makeCartEntryToOrders
                 (
@@ -104,6 +109,7 @@ public class OrderController {
 
     }
 
+    //call to confirm order after payment service makes payment and order status needs to be changed
     @RequestMapping(method = RequestMethod.POST, value = "/orderConfirmation")
     public ResponseEntity<CustomResponse> confirmPaymentForOrder(@RequestBody PaymentRequest request) {
 
@@ -119,7 +125,7 @@ public class OrderController {
         List<ProductDetails> productList = orderProductMapService.getAllProductsByOrderId(request.getOrderId());
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
-        final String uri = "https://bde8a250.ngrok.io/updateQuantity";
+        final String uri = "http://10.10.212.75:8080/updateQuantity";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -133,6 +139,7 @@ public class OrderController {
     }
 
 
+    //get order summary corresponding to an orderId
     @RequestMapping(method = RequestMethod.GET, value = "/orderSummary/{orderId}")
     public ResponseEntity<CustomResponse> postOrderSummary(@PathVariable("orderId") UUID orderId){
 
@@ -141,6 +148,8 @@ public class OrderController {
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",orderSummaryResponse));
     }
 
+
+    // get all order summaries in the database
     @RequestMapping(method = RequestMethod.GET, value = "/orderSummary")
     public ResponseEntity<CustomResponse> postAllOrderSummary(){
         List<OrderSummaryResponse> response =  orderService.createResponseForAllOrderSummary();
@@ -149,15 +158,20 @@ public class OrderController {
     }
 
 
+    //end point to cancel order
     @RequestMapping(method = RequestMethod.GET, value = "/cancelOrder/{orderId}")
-    public ResponseEntity<CustomResponse> cancelOrderRequest(@PathVariable UUID orderId){
+    public ResponseEntity<CustomResponse> cancelOrderRequest(@PathVariable UUID orderId) throws Exception{
         orderService.cancelOrderRequest(orderId);
 
-        final String cancelOrderRequest = "https://ff3b33d3.ngrok.io/payment/cancel/" + orderId;
+        final String cancelOrderRequest = "http://10.10.212.19:8080/payment/cancel/" + orderId;
 
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getForObject(cancelOrderRequest,String.class);
+        String response = restTemplate.getForObject(cancelOrderRequest,String.class);
 
+        JSONObject obj = new JSONObject(response);
+        int statusCode = obj.getInt("statusCode");
+        if(statusCode!=200)
+            return ResponseEntity.status(200).body(new CustomResponse(404,"Sorry could not initiate refund",null));
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All okay",null));
     }

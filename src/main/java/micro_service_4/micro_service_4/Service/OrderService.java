@@ -32,6 +32,7 @@ public class OrderService {
     private OrderCartMapRepository orderCartMapRepository;
 
 
+    // make order summary when user checks out his/her cart
     public CartRequestResponse makeCartEntryToOrders(String cartId, List<ProductDetails> productDetails, AddressDetails address, Integer totalCost) {
 
         UUID orderId =  saveToOrderTable(null, address.getAddressId(), totalCost);
@@ -39,6 +40,7 @@ public class OrderService {
         OrderCartMap orderCartMap = new OrderCartMap(orderId,cartId);
         orderCartMapRepository.save(orderCartMap);
 
+        // add products to orderProductMap
         for (ProductDetails prod : productDetails) {
             orderProductMapService.saveToOrderProductMap(orderId, prod.getProductId(), prod.getProductName(), prod.getQuantity(), prod.getPrice());
         }
@@ -46,21 +48,26 @@ public class OrderService {
         return new CartRequestResponse(orderId);
     }
 
+    // confirm order by making multiple api calls to catalog and cart
     public OrderSummaryResponse confirmOrderPaymentRequest(UUID orderId, String paymentId, Date dateOfPurchase, String modeOfPayment, Boolean isSuccess) {
 
         OrderCartMap orderCartMap = orderCartMapRepository.findById(orderId).get();
 
-        if(orderCartMap.getCartId().length() != 0) {
+
+        //empty cart when order is placed for cart items
+        if(orderCartMap.getCartId() != null) {
             RestTemplate restTemplate = new RestTemplate();
-            final String emptyCartUri = "https://cb289950.ngrok.io/cart/emptyCart";
+            final String emptyCartUri = "http://10.10.212.81:8080/cart/emptyCart";
             restTemplate.delete(emptyCartUri);
         }
 
+        //update table to confirm order
         this.confirmOrderPayment(orderId,dateOfPurchase,paymentId);
         return createResponseForOrderSummary(orderId);
     }
 
 
+    //creates order summary corresponding to order id, saves all data for the order
     public OrderSummaryResponse createResponseForOrderSummary(UUID orderId){
 
         Order order = orderRepository.findById(orderId)
@@ -76,6 +83,7 @@ public class OrderService {
         return response;
     }
 
+    //creates and responds with summary for all the orders in the database
     public List<OrderSummaryResponse> createResponseForAllOrderSummary(){
 
         Iterable<Order> allOrdersIterable = orderRepository.findAll();
@@ -148,6 +156,7 @@ public class OrderService {
 
     }
 
+    //api for payment service so they can get all order details required for making a payment
     public PaymentOrderResponse getResponseForPaymentService(UUID orderId) {
 
         Order order = orderRepository.findById(orderId)
