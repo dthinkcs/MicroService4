@@ -2,6 +2,7 @@ package micro_service_4.micro_service_4.Controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import micro_service_4.micro_service_4.Modules.*;
+import micro_service_4.micro_service_4.Repository.ServicablePinCodeRepository;
 import micro_service_4.micro_service_4.Service.AddressDetailsService;
 import micro_service_4.micro_service_4.Service.OrderProductMapService;
 import micro_service_4.micro_service_4.Service.OrderService;
@@ -27,6 +28,9 @@ public class OrderController {
     @Autowired
     private OrderProductMapService orderProductMapService ;
 
+    @Autowired
+    private ServicablePinCodeRepository servicablePinCodeRepository;
+
 
     // make order summary when user checks out cart or clicks on buy now
     @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry")
@@ -51,6 +55,16 @@ public class OrderController {
                 return ResponseEntity.status(200).body(new CustomResponse(500,"Zero product Quantity not allowed",null));
             }
         }
+
+
+        ServiceablePinCode pc = servicablePinCodeRepository.findById(request.getAddress().getPinCode())
+                .orElse(null);
+
+        if(pc == null || pc.isServicable() == false)
+            return ResponseEntity.status(200).body(new CustomResponse(404,"Pin code not servicable",null));
+
+
+
 
         List<ProductDetails> validate_products= request.getProducts();
         List<String> requestToValidate = new ArrayList<>();
@@ -203,6 +217,17 @@ public class OrderController {
 
         PaymentOrderResponse paymentOrderResponse = orderService.getResponseForPaymentService(orderId);
         return ResponseEntity.status(200).body(new CustomResponse(200,"All Okay",paymentOrderResponse));
+
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET,value = "/addPin/{pinCode}")
+    public ResponseEntity<CustomResponse> addPinCode(@PathVariable Integer pinCode){
+
+        ServiceablePinCode pc = new ServiceablePinCode(pinCode,true);
+        servicablePinCodeRepository.save(pc);
+
+        return ResponseEntity.status(200).body(new CustomResponse(200,"All Okay",pc));
 
 
     }
