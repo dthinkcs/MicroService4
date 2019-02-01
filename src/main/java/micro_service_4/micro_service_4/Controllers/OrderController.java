@@ -7,6 +7,9 @@ import micro_service_4.micro_service_4.Service.AddressDetailsService;
 import micro_service_4.micro_service_4.Service.OrderProductMapService;
 import micro_service_4.micro_service_4.Service.OrderService;
 
+import micro_service_4.micro_service_4.Service.ServicablePinCodeService;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.json.JSONArray;
@@ -29,36 +32,44 @@ public class OrderController {
     private OrderProductMapService orderProductMapService ;
 
     @Autowired
-    private ServicablePinCodeRepository servicablePinCodeRepository;
+    private ServicablePinCodeService servicablePinCodeService;
+
+
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
+
+    public OrderController(OrderService orderService, AddressDetailsService addressDetailsService, OrderProductMapService orderProductMapService, ServicablePinCodeService servicablePinCodeService,RestTemplate restTemplate) {
+        this.orderService = orderService;
+        this.addressDetailsService = addressDetailsService;
+        this.orderProductMapService = orderProductMapService;
+        this.servicablePinCodeService = servicablePinCodeService;
+        this.restTemplate = restTemplate;
+    }
+
 
 
     // make order summary when user checks out cart or clicks on buy now
     @RequestMapping(method = RequestMethod.POST, value = "/addCartEntry")
     public ResponseEntity<CustomResponse> addCartEntry(@RequestBody CartRequest request) throws Exception {
 
-        System.out.println("frontend se call aai");
-        System.out.println(request.getAddress());
 
+//        System.out.println(request.getProducts());
         //basic validations on data sent in the request
         if(request.getProducts().size() == 0)
                 return ResponseEntity.status(200).body(new CustomResponse(404,"No products Found",null));
 
-        if(request.getTotalCost() == 0)
-            return ResponseEntity.status(200).body(new CustomResponse(500,"Zero total Cost not allowed  ",null));
-
-        if(request.getAddress().getPinCode() == null || request.getAddress().getPinCode().equals(""))
-            return ResponseEntity.status(200).body(new CustomResponse(500,"Pin Code required",null));
-
         for(ProductDetails prodDetail: request.getProducts()){
 
             if(prodDetail.getQuantity() <= 0 ){
-                return ResponseEntity.status(200).body(new CustomResponse(500,"Zero product Quantity not allowed",null));
+                return ResponseEntity.status(200).body(new CustomResponse(404,"Zero product Quantity not allowed",null));
             }
         }
 
 
-        ServiceablePinCode pc = servicablePinCodeRepository.findById(request.getAddress().getPinCode())
-                .orElse(null);
+        ServiceablePinCode pc = servicablePinCodeService.findById(request.getAddress().getPinCode());
 
         if(pc == null || pc.isServicable() == false)
             return ResponseEntity.status(200).body(new CustomResponse(404,"Pin code not servicable",null));
@@ -73,16 +84,19 @@ public class OrderController {
             requestToValidate.add(prod.getProductId());
         }
 
-        RestTemplate restTemplate = new RestTemplate();
+//        RestTemplate restTemplate = new RestTemplate();
 
-        final String uri ="http://10.10.212.75:8080/getProductsById";
+        final String uri ="http://10.10.212.75:8080/getProductsById/";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List> entity = new HttpEntity<>(requestToValidate,headers);
 
         String productList = restTemplate.postForObject(uri,entity,String.class);
 
+        System.out.println(productList);
         JSONObject obj = new JSONObject(productList);
+        System.out.println("hiiiiiii");
+        System.out.println(obj);
         JSONArray arr = obj.getJSONArray("responseData");
 
 
@@ -95,11 +109,11 @@ public class OrderController {
             ProductDetails prod = mapper.readValue(arr.getJSONObject(i).toString(),ProductDetails.class);
 
             if(!prod.getProductId().equals(validate_products.get(i).getProductId()))
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Product Id doesn't match",null));
+                return ResponseEntity.status(200).body(new CustomResponse(404,"Product Id doesn't match",null));
             if(prod.getQuantity()<validate_products.get(i).getQuantity())
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Quantity doesn't match",null));
+                return ResponseEntity.status(200).body(new CustomResponse(404,"Quantity doesn't match",null));
             if(!prod.getPrice().equals(validate_products.get(i).getPrice()))
-                return ResponseEntity.status(200).body(new CustomResponse(403,"Price has been changed",null));
+                return ResponseEntity.status(200).body(new CustomResponse(404,"Price has been changed",null));
 
 
             totalCost += validate_products.get(i).getPrice() * validate_products.get(i).getQuantity();
@@ -140,7 +154,7 @@ public class OrderController {
 
         UpdateQuantity updateQuantity = new UpdateQuantity( productList,true);
         final String uri = "http://10.10.212.75:8080/updateQuantity";
-        RestTemplate restTemplate = new RestTemplate();
+//        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<UpdateQuantity> entity = new HttpEntity<>(updateQuantity,headers);
@@ -179,7 +193,7 @@ public class OrderController {
 
         final String cancelOrderRequest = "http://10.10.212.19:8080/payment/cancel/" + orderId;
 
-        RestTemplate restTemplate = new RestTemplate();
+//        RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(cancelOrderRequest,String.class);
 
         JSONObject obj = new JSONObject(response);
@@ -225,7 +239,7 @@ public class OrderController {
     public ResponseEntity<CustomResponse> addPinCode(@PathVariable Integer pinCode){
 
         ServiceablePinCode pc = new ServiceablePinCode(pinCode,true);
-        servicablePinCodeRepository.save(pc);
+        servicablePinCodeService.addPinCode(pc);
 
         return ResponseEntity.status(200).body(new CustomResponse(200,"All Okay",pc));
 
